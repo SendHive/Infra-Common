@@ -35,6 +35,7 @@ services:
       MINIO_ROOT_PASSWORD: minioadmin
     volumes:
       - ./test-files:/data 
+      - minio_data:/var/lib/minio/data
     command: server --console-address ":9090" /data
 
 volumes:

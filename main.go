@@ -5,8 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"time"
-
-	testsuite "infra-comman/test-suite" // Make sure this is the correct import path
+	testsuite "github.com/SendHive/Infra-Common/test-suite"
 	"github.com/spf13/cobra"
 )
 

@@ -2,11 +2,12 @@ package testsuite
 
 import (
 	"fmt"
-	"infra-comman/db"
-	"infra-comman/minio"
-	"infra-comman/queue"
 	"log"
 	"time"
+
+	"github.com/SendHive/Infra-Common/db"
+	"github.com/SendHive/Infra-Common/minio"
+	"github.com/SendHive/Infra-Common/queue"
 )
 
 func TestSuite() {
