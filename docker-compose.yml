@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   postgres:
@@ -24,16 +24,18 @@ services:
       - "15672:15672"
 
   minio:
-    image: minio/minio
-    container_name: email-publisher-minio
-    environment:
-      MINIO_ACCESS_KEY: minio
-      MINIO_SECRET_KEY: minio123
+    image: minio/minio:latest
+    container_name: minio
+    restart: always
     ports:
       - "9000:9000"
-    command: server /data
+      - "9090:9090"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
     volumes:
-      - minio_data:/data
+      - ./test-files:/data 
+    command: server --console-address ":9090" /data
 
 volumes:
   postgres_data:
