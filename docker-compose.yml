@@ -34,10 +34,22 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     volumes:
-      - ./test-files:/data 
+      - ./test-files:/data
       - minio_data:/var/lib/minio/data
     command: server --console-address ":9090" /data
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
 
 volumes:
   postgres_data:
   minio_data:
+  redis_data:
+    driver: local
