@@ -12,7 +12,7 @@ import (
 type IQueueService interface {
 	Connect() (conn *amqp.Connection, err error)
 	DeclareQueue(conn *amqp.Connection) (qu amqp.Queue, err error)
-	PublishMessage(qu amqp.Queue, conn *amqp.Connection) error
+	PublishMessage(qu amqp.Queue, conn *amqp.Connection, body string) error
 	ConsumeMessage(qu amqp.Queue, conn *amqp.Connection, isTest bool) error
 }
 
@@ -52,7 +52,7 @@ func (q *QueueService) DeclareQueue(conn *amqp.Connection) (qu amqp.Queue, err e
 	return queue, nil
 }
 
-func (q *QueueService) PublishMessage(qu amqp.Queue, conn *amqp.Connection) error {
+func (q *QueueService) PublishMessage(qu amqp.Queue, conn *amqp.Connection, body string) error {
 	ch, err := conn.Channel()
 	if err != nil {
 		log.Println("error while creating a channel: ", err)
@@ -60,7 +60,6 @@ func (q *QueueService) PublishMessage(qu amqp.Queue, conn *amqp.Connection) erro
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	body := "Hello World"
 	err = ch.PublishWithContext(ctx,
 		"",
 		qu.Name,

@@ -33,7 +33,7 @@ func TestSuite() {
 		return
 	}
 	time.Sleep(3 * time.Second)
-	err = qConn.PublishMessage(queue, qconn)
+	err = qConn.PublishMessage(queue, qconn, "hello world")
 	if err != nil {
 		fmt.Println("Error while running the PublishMessage")
 		return
