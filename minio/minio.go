@@ -12,11 +12,11 @@ import (
 
 type IMinioService interface {
 	MinioConnect() (*minio.Client, error)
-	CreateBucket(minioClient *minio.Client) error
-	DeleteBucket(minioClient *minio.Client) error
+	CreateBucket(minioClient *minio.Client, bucketName string) error
+	DeleteBucket(minioClient *minio.Client, bucketName string) error
 	ListBucket(minioClient *minio.Client) ([]minio.BucketInfo, error)
-	PutObject(minioClient *minio.Client, file string) error
-	DeleteObject(minioClient *minio.Client) error
+	PutObject(minioClient *minio.Client, bucketName string, file string, objectName string) error
+	DeleteObject(minioClient *minio.Client, buketName string) error
 }
 
 type MinioService struct{}
@@ -44,8 +44,8 @@ func (m *MinioService) MinioConnect() (*minio.Client, error) {
 	return minioClient, nil
 }
 
-func (m *MinioService) CreateBucket(minioClient *minio.Client) error {
-	err := minioClient.MakeBucket(context.Background(), "mybucket-1", minio.MakeBucketOptions{Region: "us-east-1", ObjectLocking: false})
+func (m *MinioService) CreateBucket(minioClient *minio.Client, bucketName string) error {
+	err := minioClient.MakeBucket(context.Background(), bucketName, minio.MakeBucketOptions{Region: "us-east-1", ObjectLocking: false})
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -66,8 +66,8 @@ func (m *MinioService) ListBucket(minioClient *minio.Client) ([]minio.BucketInfo
 	return buckets, nil
 }
 
-func (m *MinioService) DeleteBucket(minioClient *minio.Client) error {
-	err := minioClient.RemoveBucket(context.Background(), "mybucket-1")
+func (m *MinioService) DeleteBucket(minioClient *minio.Client, bucketName string) error {
+	err := minioClient.RemoveBucket(context.Background(), bucketName)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -76,7 +76,7 @@ func (m *MinioService) DeleteBucket(minioClient *minio.Client) error {
 	return nil
 }
 
-func (m *MinioService) PutObject(minioClient *minio.Client, filepath string) error {
+func (m *MinioService) PutObject(minioClient *minio.Client, bucketName string, filepath string, objectName string) error {
 	file, err := os.Open(filepath)
 	if err != nil {
 		fmt.Println(err)
@@ -90,7 +90,7 @@ func (m *MinioService) PutObject(minioClient *minio.Client, filepath string) err
 		return err
 	}
 
-	uploadInfo, err := minioClient.PutObject(context.Background(), "mybucket-1", "myobject", file, fileStat.Size(), minio.PutObjectOptions{ContentType: "application/octet-stream"})
+	uploadInfo, err := minioClient.PutObject(context.Background(), bucketName, objectName, file, fileStat.Size(), minio.PutObjectOptions{ContentType: "application/octet-stream"})
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -99,14 +99,14 @@ func (m *MinioService) PutObject(minioClient *minio.Client, filepath string) err
 	return nil
 }
 
-func (m *MinioService) DeleteObject(minioClient *minio.Client) error {
+func (m *MinioService) DeleteObject(minioClient *minio.Client, bucketName string) error {
 	objectsCh := make(chan minio.ObjectInfo)
 
 	// Send object names that are needed to be removed to objectsCh
 	go func() {
 		defer close(objectsCh)
 		// List all objects from a bucket-name with a matching prefix.
-		for object := range minioClient.ListObjects(context.Background(), "mybucket-1", minio.ListObjectsOptions{WithVersions: true}) {
+		for object := range minioClient.ListObjects(context.Background(), bucketName, minio.ListObjectsOptions{WithVersions: true}) {
 			if object.Err != nil {
 				log.Fatalln(object.Err)
 			}
@@ -118,7 +118,7 @@ func (m *MinioService) DeleteObject(minioClient *minio.Client) error {
 		GovernanceBypass: true,
 	}
 
-	for rErr := range minioClient.RemoveObjects(context.Background(), "mybucket-1", objectsCh, opts) {
+	for rErr := range minioClient.RemoveObjects(context.Background(), bucketName, objectsCh, opts) {
 		fmt.Println("Error detected during deletion: ", rErr)
 		return &rErr
 	}

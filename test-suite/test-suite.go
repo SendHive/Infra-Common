@@ -10,6 +10,10 @@ import (
 	"github.com/SendHive/Infra-Common/queue"
 )
 
+const (
+	bucketName = "mybucket-1"
+)
+
 func TestSuite() {
 	dbConn, err := db.NewDbRequest()
 	if err != nil {
@@ -57,7 +61,7 @@ func TestSuite() {
 
 	time.Sleep(3 * time.Second)
 
-	err = minioClient.CreateBucket(mc)
+	err = minioClient.CreateBucket(mc, bucketName)
 	if err != nil {
 		fmt.Println("Error while running the CreateBucket")
 		return
@@ -65,7 +69,7 @@ func TestSuite() {
 
 	time.Sleep(3 * time.Second)
 
-	err = minioClient.PutObject(mc, "test.txt")
+	err = minioClient.PutObject(mc, "test.txt", bucketName, "myobject")
 	if err != nil {
 		fmt.Println("Error while running the PutObject")
 		return
@@ -73,7 +77,7 @@ func TestSuite() {
 
 	time.Sleep(3 * time.Second)
 
-	err = minioClient.DeleteObject(mc)
+	err = minioClient.DeleteObject(mc, bucketName)
 	if err != nil {
 		fmt.Println("Error while running the DeleteObject")
 		return
@@ -81,7 +85,7 @@ func TestSuite() {
 
 	time.Sleep(3 * time.Second)
 
-	err = minioClient.DeleteBucket(mc)
+	err = minioClient.DeleteBucket(mc, bucketName)
 	if err != nil {
 		fmt.Println("Error while running the DeleteBucket")
 		return
