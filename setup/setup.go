@@ -11,6 +11,7 @@ import (
 )
 
 func Setup() {
+	time.Sleep(10 * time.Second)
 	dbConn, err := db.NewDbRequest()
 	if err != nil {
 		log.Fatal("the error while creating the database connection: ", err.Error())
