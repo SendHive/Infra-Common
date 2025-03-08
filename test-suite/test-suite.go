@@ -69,7 +69,7 @@ func TestSuite() {
 
 	time.Sleep(3 * time.Second)
 
-	err = minioClient.PutObject(mc, "test.txt", bucketName, "myobject")
+	err = minioClient.PutObject(mc, bucketName, "test.txt", "myobject")
 	if err != nil {
 		fmt.Println("Error while running the PutObject")
 		return

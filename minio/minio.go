@@ -45,11 +45,17 @@ func (m *MinioService) MinioConnect() (*minio.Client, error) {
 }
 
 func (m *MinioService) CreateBucket(minioClient *minio.Client, bucketName string) error {
-	err := minioClient.MakeBucket(context.Background(), bucketName, minio.MakeBucketOptions{Region: "us-east-1", ObjectLocking: false})
+	location := "us-east-1"
+	err := minioClient.MakeBucket(context.Background(), bucketName, minio.MakeBucketOptions{Region: location})
 	if err != nil {
-		fmt.Println(err)
-		return err
+		exists, errBucketExists := minioClient.BucketExists(context.Background(), bucketName)
+		if errBucketExists == nil && exists {
+			fmt.Println("Bucket already exists")
+		} else {
+			log.Fatal(err)
+		}
 	}
+
 	fmt.Println("Successfully created mybucket.")
 	return nil
 }

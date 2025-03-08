@@ -66,7 +66,7 @@ func (q *QueueService) PublishMessage(qu amqp.Queue, conn *amqp.Connection, body
 		false,
 		false,
 		amqp.Publishing{
-			ContentType: "text/plain",
+			ContentType: "application/json",
 			Body:        []byte(body),
 		},
 	)
