@@ -23,7 +23,7 @@ func main() {
 
 	rootCmd := &cobra.Command{
 		Use:   "infra-common",
-		Short: "A CLI that runs a test function or executes a shell script",
+		Short: "A CLI tool to bring up the SendHive Infra",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("Running setup.sh to bring up RabbitMQ, Minio, and DB...")
 			InfraCmd := exec.Command("sh", "setup.sh")
@@ -34,10 +34,7 @@ func main() {
 				fmt.Println("Error running setup.sh:", err)
 				os.Exit(1)
 			}
-
-			// After setup, check if testFlag is set
 			if testFlag {
-				// Run the test function if the flag is set
 				runTestFunction()
 			}
 
@@ -83,6 +80,7 @@ func main() {
 			InfraCmd.Stdout = os.Stdout
 			InfraCmd.Stderr = os.Stderr
 			err := InfraCmd.Run()
+			time.Sleep(10 * time.Second)
 			if err != nil {
 				fmt.Println("Error running setup.sh:", err)
 				os.Exit(1)
