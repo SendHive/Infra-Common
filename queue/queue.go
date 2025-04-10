@@ -81,42 +81,50 @@ func (q *QueueService) PublishMessage(qu amqp.Queue, conn *amqp.Connection, body
 func (q *QueueService) ConsumeMessage(qu amqp.Queue, conn *amqp.Connection, isTest bool) error {
 	ch, err := conn.Channel()
 	if err != nil {
-		log.Println("error while creating a channel: ", err)
+		log.Println("Error while creating a channel:", err)
 		return err
 	}
 	defer ch.Close()
+
+	// Ensure prefetch is set to avoid overwhelming the consumer
+	err = ch.Qos(1, 0, false)
+	if err != nil {
+		log.Println("Error setting QoS:", err)
+		return err
+	}
+
 	msgs, err := ch.Consume(
 		qu.Name,
 		"",
-		true,
+		false, // Auto-Ack set to false to manually acknowledge after processing
 		false,
 		false,
 		false,
 		nil,
 	)
 	if err != nil {
-		log.Println("error while consuming the msgs : ", err)
+		log.Println("Error while consuming the msgs:", err)
 		return err
 	}
-
-	var forever chan struct{}
 
 	if isTest {
 		for d := range msgs {
 			log.Printf("Received a message: %s", d.Body)
+			_ = d.Ack(false) // Acknowledge message after processing
 			break
 		}
-		fmt.Println("Consumed Message Sucessfully!")
+		fmt.Println("Consumed Message Successfully!")
 	} else {
-		go func() {
-			for d := range msgs {
-				log.Printf("Received a message: %s", d.Body)
-				if len(d.Body) == 1 {
-					break
+		for d := range msgs {
+			go func(msg amqp.Delivery) {
+				log.Printf("Processing message: %s", msg.Body)
+				err := msg.Ack(false) // Acknowledge message after processing
+				if err != nil {
+					log.Println("Failed to acknowledge message:", err)
 				}
-			}
-		}()
-		<-forever
+			}(d)
+		}
 	}
+
 	return nil
 }
